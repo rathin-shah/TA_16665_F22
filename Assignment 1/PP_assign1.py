@@ -11,18 +11,18 @@ import math
 import matplotlib.pyplot as plt
 import numpy as np
 
-
+# Pure Pursuit parameters
 L = 1  # look ahead distance
 dt = 0.1  # discrete time
 
 # Vehicle parameters (m)
-LENGTH = 4.5
-WIDTH = 2.0
-BACKTOWHEEL = 1.0
-WHEEL_LEN = 0.3
-WHEEL_WIDTH = 0.2
-TREAD = 0.7
-WB = 2.5
+LENGTH = 4.5        #length of the vehicle (for the plot)
+WIDTH = 2.0         #length of the vehicle (for the plot)
+BACKTOWHEEL = 1.0   #length of the vehicle (for the plot)
+WHEEL_LEN = 0.3     #length of the vehicle (for the plot)
+WHEEL_WIDTH = 0.2   #length of the vehicle (for the plot)
+TREAD = 0.7         #length of the vehicle (for the plot)
+WB = 2.5            # wheel-base
 
 
 def plotVehicle(x, y, yaw, steer=0.0, cabcolor="-r", truckcolor="-k"):
@@ -129,16 +129,19 @@ def getDistance(p1, p2):
 class Vehicle:
     def __init__(self, x, y, yaw, vel=0):
         """
-        Define a vehicle class
+        Define a vehicle class (state of the vehicle)
         :param x: float, x position
         :param y: float, y position
         :param yaw: float, vehicle heading
         :param vel: float, velocity
+
         """
-        self.x = x
-        self.y = y
-        self.yaw = yaw
-        self.vel = vel
+        # State of the vehicle
+
+        self.x = x #x coordinate of the vehicle 
+        self.y = y #y coordinate of the vehicle
+        self.yaw = yaw  #yaw of the vehicle
+        self.vel = vel  #velocity of the vehicle
 
     def update(self, acc, delta):
         """
@@ -147,11 +150,8 @@ class Vehicle:
         :param delta: float, heading control
         """
 
-        # TODO- update the state of the vehicle (x,y,yaw,vel) based on pure pursuit and simple bicycle model
-        self.x += self.vel * math.cos(self.yaw) * dt
-        self.y += self.vel * math.sin(self.yaw) * dt
-        self.yaw += self.vel * math.tan(delta) / WB * dt
-        self.vel += acc * dt
+        # TODO- update the state of the vehicle (x,y,yaw,vel) based on simple bicycle model
+
 
 
 class Trajectory:
@@ -187,7 +187,7 @@ class Trajectory:
         return self.getPoint(target_idx)
 
 
-class PI:
+class Controller:
     def __init__(self, kp=1.0, ki=0.1):
         """
         Define a PID controller class
@@ -201,9 +201,9 @@ class PI:
         self.Iterm = 0.0
         self.last_error = 0.0
 
-    def control(self, error):
+    def longitudinal_control(self, error):
         """
-        PID main function, given an input, this function will output a control unit
+        PID main function, given an input, this function will output a acceleration for longitudinal error
         :param error: float, error term
         :return: float, output control
         """
@@ -215,8 +215,8 @@ class PI:
         return output
    
     def PurePursuitcontrol(self, error):
-        #TODO find delta
-        delta = math.atan2(2.0 * L * math.sin(error) / L, 1.0)
+        #TODO- find delta
+        delta = 0
         return delta
 
 def main():
@@ -233,9 +233,9 @@ def main():
     traj = Trajectory(traj_x, traj_y)
     goal = traj.getPoint(len(traj_x) - 1)
 
-    # create PI controller
-    PI_acc = PI()
-    PI_yaw = PI()
+    # create longitudinal and pure pursuit controller
+    PI_acc = Controller()
+    PI_yaw = Controller()
 
     # real trajectory
     traj_ego_x = []
@@ -248,11 +248,13 @@ def main():
 
         # use PID to control the speed vehicle
         vel_err = target_vel - ego.vel
-        acc = PI_acc.control(vel_err)
+        acc = PI_acc.longitudinal_control(vel_err)
 
-        yaw_err = math.atan2(target_point[1] - ego.y, target_point[0] - ego.x) - ego.yaw
-        # delta = PI_yaw.control(yaw_err)
-        delta = PI_yaw.PurePursuitcontrol(yaw_err)
+        # use pure pursuit to control the heading of the vehicle
+        # TODO- Calculate the yaw error
+        yaw_err = 0   #TODO- Update the equation
+
+        delta = PI_yaw.PurePursuitcontrol(yaw_err)  #TODO- update thr Pure pursuit controller
 
         # move the vehicle
         ego.update(acc, delta)
