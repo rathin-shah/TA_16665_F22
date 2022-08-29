@@ -151,7 +151,10 @@ class Vehicle:
         """
 
         # TODO- update the state of the vehicle (x,y,yaw,vel) based on simple bicycle model
-
+        # self.x += self.vel * math.cos(self.yaw) * dt
+        # self.y += self.vel * math.sin(self.yaw) * dt
+        # self.yaw += self.vel * math.tan(delta) / WB * dt
+        # self.vel += acc * dt
 
 
 class Trajectory:
@@ -217,6 +220,7 @@ class Controller:
     def PurePursuitcontrol(self, error):
         #TODO- find delta
         delta = 0
+        # delta = math.atan2(2.0 * L * math.sin(error) / L, 1.0)
         return delta
 
 def main():
@@ -253,6 +257,7 @@ def main():
         # use pure pursuit to control the heading of the vehicle
         # TODO- Calculate the yaw error
         yaw_err = 0   #TODO- Update the equation
+        # yaw_err = yaw_err = math.atan2(target_point[1] - ego.y, target_point[0] - ego.x) - ego.yaw
 
         delta = PI_yaw.PurePursuitcontrol(yaw_err)  #TODO- update thr Pure pursuit controller
 
